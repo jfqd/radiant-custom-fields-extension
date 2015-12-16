@@ -1,0 +1,31 @@
+---
+en: 
+  activerecord:
+    errors:
+      models:
+        custom_field:
+          attributes:
+            name:
+              taken: 'bereits in Gebrauch'
+  cf_add_custom_field_input: 'Neues Feld'
+  cf_add_new_custom_field: 'Neues Feld hinzufügen'
+  cf_cancel: 'Abbrechen'
+  cf_close: 'Schließen'
+  cf_custom_fields: 'Seiten Felder'
+  cf_delete: 'Löschen'
+  cf_delete_confirm: 'Sind Sie sicher, dass Sie das Feld "%{name}" von dieser Seite löschen wollen?'
+  cf_enter_new: 'Enter new'
+  cf_name: 'Name'
+  cf_select: ' - Auswählen - '
+  cf_select_existing: 'Vorhandene Auswählen'
+  cf_show_custom_field_button: 'Zeige Seiten Felder'
+  cf_update: 'Update'
+  cf_value: 'Wert'
+  custom_fields_controller:
+    flash_error:
+      create: 'Fehler beim Erstellen eines Feldes:'
+      update: 'Fehler beim Ändern eines Feldes:'
+    flash_success:
+      create: 'Das Feld wurde erfolgreich hinzugefügt!'
+      destroy: 'Das Feld wurde erfolgreich entfernt!'
+      update: 'Das Feld wurde erfolgreich geändert!!'
