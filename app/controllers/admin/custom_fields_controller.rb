@@ -1,4 +1,10 @@
 class Admin::CustomFieldsController < ApplicationController
+  
+  only_allow_access_to :index, :new, :edit, :update, :remove, :destroy,
+    :when => [:custom_fields],
+    :denied_url => {:controller => 'welcome', :action => 'index'},
+    :denied_message => "See your administrator if you'd like to view this information"
+  
   layout 'custom_fields'
   before_filter :find_page
   before_filter :attach_assets, :find_all_assignable_custom_fields, :only => [:index]
