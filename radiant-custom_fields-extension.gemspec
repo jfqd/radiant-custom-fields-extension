@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = RadiantCustomFieldsExtension::AUTHORS
   s.email       = RadiantCustomFieldsExtension::EMAIL
-  s.homepage    = RadiantCustomFieldsExtension::HOMEPAGE
+  s.homepage    = RadiantCustomFieldsExtension::URL
   s.summary     = RadiantCustomFieldsExtension::SUMMARY
   s.description = RadiantCustomFieldsExtension::DESCRIPTION
   
