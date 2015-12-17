@@ -1,4 +1,5 @@
 - if @current_user.has_role?(:custom_fields)
-  - if( page_part.page.parts.first.id == page_part.id rescue false )
+  - first_page_part_id = page_part.page.parts.first.id rescue nil
+  - if( !page_part.new_record? && first_page_part_id == page_part.id )
     %span#show_custom_fields
       %a.popup{ :href => "#custom_fields" }= t('cf_show_custom_field_button')
