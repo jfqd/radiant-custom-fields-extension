@@ -4,128 +4,120 @@ module CustomFields
     include Radiant::Taggable
     class TagError < StandardError; end
 
-    tag 'custom_fields' do |tag|
-      page = tag.locals.page
-      tag.locals.custom_fields = page.custom_fields.find_by_name(tag.attr["name"]) rescue nil if tag.attr['name']
-      tag.expand
-    end
-  
-    desc %{
-      Iterates through all the custom fields in the current page.
-      The @name@ attribute is not required on any nested custom fields tags.
-
-      *Usage*:
-
-      <pre><code>
-        <r:custom_fields:each [order="asc|desc"] [by="name|value|created_at..."] [limit=0][offset=0]>
-          <r:value />
-        </r:custom_fields:each>
-      </code></pre>
-    }
-    tag 'custom_fields:each' do |tag|
-      page = tag.locals.page
-      output = []
-      order = tag.attr["order"] || "ASC"
-      by = tag.attr["by"] || "name"
-      limit = tag.attr["limit"] || nil
-      offset = tag.attr["offset"] || nil
-      page.custom_fields.find(:all, :order =>  [by, order].join(" "), :limit => limit, :offset => offset).each do |cf|
-        tag.locals.custom_fields = cf
-        output << tag.expand
-      end
-      output
-    end
-    
-    desc %{
-      Renders the value of the custom_field.
-      The @name@ attribute is required on this tag or the parent tag.
-      Use the @inherit@ attribute to specify that if a page does not have a custom_field by that name, the tag should render the parent's custom_field. By default @inherit@ is set to @false@.
-      You can use the @default_value@ attribute to render a default value in case the custom field is unknown. By default @default_value@ is not set.
-
-      *Usage*:
-
-      <pre><code><r:custom_fields:value name="custom_field_name" [default_value="some_value"] [inherit="true"] /></code></pre>
-    }
-    tag 'custom_fields:value' do |tag|
-      raise TagError, "'name' attribute required" unless name = tag.attr['name'] or tag.locals.custom_fields
-      default_value = tag.attr["default_value"] || ""
-      inherit = tag.attr["inherit"] || false
-      
-      page = tag.locals.page
-      
-      cf = tag.locals.custom_fields || page.custom_fields.find(:first, :conditions => {:name => name})
-      
-      if inherit
-        while (cf.nil? and (not page.parent.nil?)) do
-          page = page.parent
-          cf = page.custom_fields.find(:first, :conditions => {:name => name})
-        end
-      end
-      
-      if cf
-        cf.value
-      else
-        default_value.blank? ? "Unknown custom field '#{name}'." : default_value
-      end
-    end
-    
-    desc %{
-      Renders the containing elements only if the page's custom fields value matches the regular expression given in @pattern@ attribute.
-      The @name@ attribute is required on this tag or the parent tag.
-      The @pattern@ attribute is required on this tag.
-      Use the @inherit@ attribute to specify that if a page does not have a custom_field by that name, the tag should find the parent's custom_field. By default @inherit@ is set to @false@.
+    desc %(
+      Renders the requested field from the current page. Requires a @name@ attribute.
 
       *Usage:*
+      <pre><code><r:field name="address" /></code></pre>
+    )
+    tag 'field' do |tag|
+      attr = tag.attr.symbolize_keys
+      page = tag.locals.page
+      conditions = if defined?(Globalize2Extension)
+        ["locale = ? AND name = ?", I18n.locale.to_s, attr[:name]]
+      else
+        ["name = ?", attr[:name]]
+      end
+      content = page.custom_fields.find(:first, :conditions => conditions).try(:value)
+      if content.blank?
+        ""
+      elsif attr[:as] == "unordered-list" || attr[:as] == "ordered-list"
+        seperator = attr[:seperator] || ","
+        element = attr[:as] == "unordered-list" ? :ul : :ol
+        o = "<#{element}>"
+        content.split(seperator).compact.each do |entry|
+          o << "<li>#{entry.strip}</li>"
+        end
+        o << "</#{html_escape(element)}>"
+        o
+      elsif attr[:as] == "link"
+        link_text = attr[:link_text] || content
+        "<a href=\"#{html_escape(content)}\">#{html_escape(link_text)}</a>"
+      elsif attr[:as] == "email"
+        if defined?(EnkoderTagsExtension)
+          # encrypt email
+          # default to using the email address as the link_text
+          link_text = attr[:link_text] || content
 
-      <pre><code><r:custom_fields:if_matches name="custom_field_name" pattern="regexp" [inherit="true"]>...</r:custom_fields:if_matches></code></pre>
-    }
-    tag 'custom_fields:if_matches' do |tag|
-      raise TagError.new("'pattern' attribute required") unless pattern = tag.attr['pattern']
-      raise TagError.new("'name' attribute required") unless name = tag.attr['name'] or tag.locals.custom_fields
-      inherit = tag.attr["inherit"] || false
-      
-      regexp = Regexp.new(pattern)
-      page = tag.locals.page
-      
-      cf = tag.locals.custom_fields || page.custom_fields.find(:first, :conditions => {:name => name})
-      
-      if inherit
-        while (cf.nil? and (not page.parent.nil?)) do
-          page = page.parent
-          cf = page.custom_fields.find(:first, :conditions => {:name => name})
+          attrs = tag.attr.dup
+          attrs.delete('as')
+          attrs.delete('name')
+          attrs.delete('email')
+          attrs.delete('title_text')
+          attrs.delete('subject')
+          attrs.delete('link_text')
+
+          Enkoder.new.enkode_mailto(
+            html_escape(content), link_text, attr[:title_text], attr[:subject], attrs
+          )
+        else
+          link_text = attr[:link_text] || content
+          "<a href=\"mailto:#{html_escape(content)}\">#{html_escape(link_text)}</a>"
         end
-      end
-      
-      if cf && cf.value.match(regexp)
-        tag.expand
+      else
+        html_escape content
       end
     end
-    
-    desc %{
-      The opposite of @if_matches@ tag.
-      
-      <pre><code><r:custom_fields:unless_matches name="custom_field_name" pattern="regexp" [inherit="true"]>...</r:custom_fields:unless_matches></code></pre>
-    }
-    tag 'custom_fields:unless_matches' do |tag|
-      raise TagError.new("'pattern' attribute required") unless pattern = tag.attr['pattern']
-      raise TagError.new("'name' attribute required") unless name = tag.attr['name'] or tag.locals.custom_fields
-      inherit = tag.attr["inherit"] || false
-      
-      regexp = Regexp.new(pattern)
+
+    desc %(
+      Renders the contained elements if the field given in the @name@ attribute
+      exists. The tag also takes an optional @matches@ attribute;
+      it will expand the tag if the field's content matches the
+      given string or regex.
+
+      *Usage:*
+      <pre><code><r:if_field name="author" [matches="John"]>...</r:if_field></code></pre>
+    )
+    tag 'if_field' do |tag|
+      raise TagError.new("`if_field' tag must contain a `name' attribute.") unless tag.attr.has_key?('name')
+      attr = tag.attr.symbolize_keys
       page = tag.locals.page
-      
-      cf = tag.locals.custom_fields || page.custom_fields.find(:first, :conditions => {:name => name})
-      
-      if inherit
-        while (cf.nil? and (not page.parent.nil?)) do
-          page = page.parent
-          cf = page.custom_fields.find(:first, :conditions => {:name => name})
+      conditions = if defined?(Globalize2Extension)
+        ["locale = ? AND name = ?", I18n.locale.to_s, attr[:name]]
+      else
+        ["name = ?", attr[:name]]
+      end
+      content = page.custom_fields.find(:first, :conditions => conditions).try(:value)
+      if page.present? && content.present?
+        if attr[:matches].present?
+          regexp = build_regexp_for(tag, 'matches')
+          unless content.match(regexp).nil?
+             tag.expand
+          end
+        else
+          tag.expand
         end
       end
-      
-      unless cf && cf.value.match(regexp)
-        tag.expand
+    end
+
+    desc %(
+      The opposite of @if_field@. Renders the contained elements unless the field
+      given in the @name@ attribute exists. The tag also takes an optional
+      @matches@ attribute; it will expand the tag unless the
+      field's content matches the given string or regex.
+
+      *Usage:*
+      <pre><code><r:unless_field name="author" [matches="John"]>...</r:unless_field></code></pre>
+    )
+    tag 'unless_field' do |tag|
+      raise TagError.new("`unless_field' tag must contain a `name' attribute.") unless tag.attr.has_key?('name')
+      attr = tag.attr.symbolize_keys
+      page = tag.locals.page
+      conditions = if defined?(Globalize2Extension)
+        ["locale = ? AND name = ?", I18n.locale.to_s, attr[:name]]
+      else
+        ["name = ?", attr[:name]]
+      end
+      content = page.custom_fields.find(:first, :conditions => conditions).try(:value)
+      if attr[:matches].present?
+        regexp = build_regexp_for(tag, 'matches')
+        if content.match(regexp).nil?
+           tag.expand
+        end
+      else
+        tag.expand if page.present? && content.blank?
       end
     end
+
   end
 end
