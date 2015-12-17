@@ -18,8 +18,8 @@ de:
   cf_name: 'Name'
   cf_select: ' - Auswählen - '
   cf_select_existing: 'Vorhandene Auswählen'
-  cf_show_custom_field_button: 'Zeige Seiten Felder'
-  cf_update: 'Update'
+  cf_show_custom_field_button: 'Seiten Felder öffnen'
+  cf_update: 'Speichern'
   cf_value: 'Wert'
   custom_fields_controller:
     flash_error:

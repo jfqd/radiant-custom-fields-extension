@@ -1,9 +1,4 @@
 - form_for :custom_field, :url => custom_fields_path(@page) do |f|
-  .top
-    .name
-      = t('cf_name')
-    .value
-      = t('cf_value')
   .content
     = f.hidden_field :page_id, :value => params[:page_id]
     .name

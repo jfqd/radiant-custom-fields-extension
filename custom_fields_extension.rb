@@ -12,7 +12,7 @@ class CustomFieldsExtension < Radiant::Extension
     Page.send(:include, CustomFields::CustomFieldsTags)
     
     admin.page.edit.add :part_controls, "show_custom_fields"
-    admin.page.edit.add :main, "custom_fields_popup", :after => "edit_buttons"
+    admin.page.edit.add :popups, "custom_fields_popup"
   end
   
   def deactivate
