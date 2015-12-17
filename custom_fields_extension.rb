@@ -11,7 +11,7 @@ class CustomFieldsExtension < Radiant::Extension
     Page.send(:include, CustomFields::PageExtensions)
     Page.send(:include, CustomFields::CustomFieldsTags)
     
-    admin.page.edit.add :part_controls, "show_custom_fields"
+    admin.page.edit.add :part_controls, "admin/pages/show_custom_fields"
     admin.page.edit.add :popups, "custom_fields_popup"
   end
   
