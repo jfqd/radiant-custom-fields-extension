@@ -16,6 +16,7 @@ class Admin::CustomFieldsController < ApplicationController
   def create
     @custom_field = CustomField.new(params[:custom_field])
     params[:select_name].blank? ? @custom_field.name = params[:custom_field][:name] : @custom_field.name = params[:select_name]
+    @custom_field.locale = I18n.locale.to_s if defined?(Globalize2Extension)
     if @custom_field.save
       flash[:success] = t('custom_fields_controller.flash_success.create')
       redirect_to custom_fields_path(@page)
