@@ -1,5 +1,5 @@
 ---
-en: 
+de: 
   activerecord:
     errors:
       models:
@@ -14,7 +14,7 @@ en:
   cf_custom_fields: 'Seiten Felder'
   cf_delete: 'Löschen'
   cf_delete_confirm: 'Sind Sie sicher, dass Sie das Feld "%{name}" von dieser Seite löschen wollen?'
-  cf_enter_new: 'Enter new'
+  cf_enter_new: 'Neues Feld erstellen'
   cf_name: 'Name'
   cf_select: ' - Auswählen - '
   cf_select_existing: 'Vorhandene Auswählen'
