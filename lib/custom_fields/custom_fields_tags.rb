@@ -37,18 +37,26 @@ module CustomFields
         if defined?(EnkoderTagsExtension)
           # encrypt email
           # default to using the email address as the link_text
-          link_text = attr[:link_text] || content
+          link_text   = attr[:link_text] || content
+          js_fallback = ( attr[:js_fallback] == 'true' ? true : false )
 
           attrs = tag.attr.dup
-          attrs.delete('as')
-          attrs.delete('name')
-          attrs.delete('email')
-          attrs.delete('title_text')
-          attrs.delete('subject')
-          attrs.delete('link_text')
+          attrs.delete(:as)
+          attrs.delete(:name)
+          attrs.delete(:email)
+          attrs.delete(:title_text)
+          attrs.delete(:subject)
+          attrs.delete(:link_text)
+          attrs.delete(:js_fallback)
 
+          # enkode_mailto( email, link_text, js_fallback=false , title_text=nil, subject=nil, attrs=nil )
           Enkoder.new.enkode_mailto(
-            html_escape(content), link_text, attr[:title_text], attr[:subject], attrs
+            html_escape(content),
+            link_text,
+            js_fallback,
+            attr[:title_text],
+            attr[:subject],
+            attrs
           )
         else
           link_text = attr[:link_text] || content
