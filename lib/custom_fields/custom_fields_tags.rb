@@ -32,7 +32,15 @@ module CustomFields
         o
       elsif attr[:as] == "link"
         link_text = attr[:link_text] || content
-        "<a href=\"#{html_escape(content)}\">#{html_escape(link_text)}</a>"
+        
+        options = tag.attr.dup
+        options.delete('as')
+        options.delete('name')
+        
+        attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
+        attributes = " #{attributes}" unless attributes.empty?
+        
+        %{<a href="#{html_escape(content)}"#{attributes}>#{html_escape(link_text)}</a>}
       elsif attr[:as] == "email"
         if defined?(EnkoderTagsExtension)
           # encrypt email
@@ -40,14 +48,14 @@ module CustomFields
           link_text   = attr[:link_text] || content
           js_fallback = ( attr[:js_fallback] == 'true' ? true : false )
 
-          attrs = tag.attr.dup
-          attrs.delete('as')
-          attrs.delete('name')
-          attrs.delete('email')
-          attrs.delete('title_text')
-          attrs.delete('subject')
-          attrs.delete('link_text')
-          attrs.delete('js_fallback')
+          options = tag.attr.dup
+          options.delete('as')
+          options.delete('name')
+          options.delete('email')
+          options.delete('title_text')
+          options.delete('subject')
+          options.delete('link_text')
+          options.delete('js_fallback')
 
           # enkode_mailto( email, link_text, js_fallback=false , title_text=nil, subject=nil, attrs=nil )
           Enkoder.new.enkode_mailto(
@@ -56,11 +64,19 @@ module CustomFields
             js_fallback,
             attr[:title_text],
             attr[:subject],
-            attrs
+            options
           )
         else
           link_text = attr[:link_text] || content
-          "<a href=\"mailto:#{html_escape(content)}\">#{html_escape(link_text)}</a>"
+          
+          options = tag.attr.dup
+          options.delete('as')
+          options.delete('name')
+          
+          attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
+          attributes = " #{attributes}" unless attributes.empty?
+          
+          %{<a href="mailto:#{html_escape(content)}"#{attributes}>#{html_escape(link_text)}</a>}
         end
       else
         html_escape content
