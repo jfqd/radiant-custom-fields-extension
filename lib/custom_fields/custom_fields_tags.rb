@@ -36,6 +36,7 @@ module CustomFields
         options = tag.attr.dup
         options.delete('as')
         options.delete('name')
+        options.delete('link_text')
         
         attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
         attributes = " #{attributes}" unless attributes.empty?
@@ -72,6 +73,7 @@ module CustomFields
           options = tag.attr.dup
           options.delete('as')
           options.delete('name')
+          options.delete('link_text')
           
           attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
           attributes = " #{attributes}" unless attributes.empty?
