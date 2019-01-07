@@ -80,6 +80,20 @@ module CustomFields
           
           %{<a href="mailto:#{html_escape(content)}"#{attributes}>#{html_escape(link_text)}</a>}
         end
+      elsif attr[:as] == "phone"
+        link_text = attr[:link_text] || content
+        country_prefix = attr[:country_prefix] || '+49'
+        
+        number = content.gsub(/[-_|\/\.\s]/, "")
+        number = "#{country_prefix}#{number[1..-1]}" unless number[0] == "+"
+        
+        options = tag.attr.dup
+        options.delete('as')
+        options.delete('name')
+        options.delete('link_text')
+        options.delete('country_prefix')
+        
+        %{<a href="tel:#{html_escape(number)}"#{attributes}>#{html_escape(link_text)}</a>}
       else
         html_escape content
       end
