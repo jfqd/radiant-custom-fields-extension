@@ -1,5 +1,5 @@
 module RadiantCustomFieldsExtension
-  VERSION     = "0.9.5"
+  VERSION     = "0.9.6"
   SUMMARY     = "Custom fields for Radiant pages"
   DESCRIPTION = "An extension that allows you to add custom fields to Radiant CMS pages."
   URL         = "https://github.com/Aissac/radiant-custom-fields-extension"
